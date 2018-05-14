@@ -14,6 +14,17 @@ class TestURL(unittest.TestCase):
     def setUp(self):
         self.response = self._get_movies(movie='batman')
 
+    def test_spl_001(self):
+        """
+        SPL-001:
+        No two movies should have the same image
+        """
+        images = []
+        for movie in self.response.json()['results']:
+            if movie['poster_path'] in images:
+                self.assertTrue(False, 'Duplicate image found, ' + movie['poster_path'])
+            images.append(movie['poster_path'])
+
     # def test_print(self):
     #     """
     #     SPL-005:

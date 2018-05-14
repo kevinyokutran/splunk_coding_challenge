@@ -9,6 +9,10 @@ class TestURL(unittest.TestCase):
     drop_box_url = "https://api.dropboxapi.com/2/files/get_metadata"
     max_genre_ids = 400
     max_genre_ids_count = 7
+    expected_similar_count = 2
+
+    def setUp(self):
+        self.response = self._get_movies(movie='batman')
 
     # def test_print(self):
     #     """
@@ -23,9 +27,8 @@ class TestURL(unittest.TestCase):
         SPL-004:
         The number of movies whose sum of "genre_ids" < 400 should be no more than 7.
         """
-        r = self._get_movies(movie='batman')
         count = 0
-        for movie in r.json()['results']:
+        for movie in self.response.json()['results']:
             if sum(movie['genre_ids']) > self.max_genre_ids:
                 count += 1
         self.assertTrue(count <= self.max_genre_ids_count, 'Exceeded max count')
@@ -35,13 +38,26 @@ class TestURL(unittest.TestCase):
         SPL-005:
         There is at least one movie in the database whose title has a palindrome in it.
         """
-        r = self._get_movies(movie='batman')
         count = 0
-        for movie in r.json()['results']:
+        for movie in self.response.json()['results']:
             for word in movie['title'].split():
                 if self._is_palindrome(word):
                     count += 1
         self.assertTrue(count > 0, 'No palindromes in any titles')
+
+    def test_spl_006(self):
+        """
+        SPL-006:
+        There are at least two movies in the database whose title contain the title of another movie.
+        """
+        count = 0
+        for movie1 in self.response.json()['results']:
+            for movie2 in self.response.json()['results']:
+                if (movie1['title'] != movie2['title'] and
+                    (movie1['title'] in movie2['title'] or
+                     movie2['title'] in movie1['title'])):
+                    count += 1
+        self.assertTrue(count >= self.expected_similar_count, 'Not enough similar titles')
 
     def _get_movies(self, movie, count=0):
         params = {'q': movie}

@@ -3,7 +3,7 @@ import requests
 import json
 
 
-class TestURL(unittest.TestCase):
+class TestRequirements(unittest.TestCase):
 
     url = 'https://splunk.mocklab.io/movies'
     drop_box_url = "https://api.dropboxapi.com/2/files/get_metadata"
@@ -24,6 +24,23 @@ class TestURL(unittest.TestCase):
             if movie['poster_path'] in images:
                 self.assertTrue(False, 'Duplicate image found, ' + movie['poster_path'])
             images.append(movie['poster_path'])
+
+    def test_spl_002(self):
+        """
+        SPL-002:
+        All poster_path links must be valid. poster_path link of null is also acceptable
+        """
+        pass
+
+    def test_spl_003(self):
+        """
+        SPL-003:
+        Sorting requirement.
+        Rule #1 Movies with genre_ids == null should be first in response.
+        Rule #2, if multiple movies have genre_ids == null, then sort by id (ascending).
+        For movies that have non-null genre_ids, results should be sorted by id (ascending)
+        """
+        pass
 
     # def test_print(self):
     #     """
@@ -71,7 +88,7 @@ class TestURL(unittest.TestCase):
         self.assertTrue(count >= self.expected_similar_count, 'Not enough similar titles')
 
     def _get_movies(self, movie, count=0):
-        params = {'q': movie}
+        params = {'q': movie, 'count': count, }
         headers = {'accept': 'application/json'}
         return requests.get(self.url, params=params, headers=headers)
 

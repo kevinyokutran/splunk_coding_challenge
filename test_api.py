@@ -18,10 +18,11 @@ class TestAPI(BaseTest):
         Get batman movies that are expected to exist
         Assert: HTTP 200, # of movies returned > 0
         """
-        r = self.get_movies(movie='batman')
+        r = self.get_movies(movie=self.default_movie)
         self.assertTrue(r.status_code == 200,
                         'Expected 200, received ' + str(r.status_code))
-        self.assertTrue(len(r.json()['results']) > 0, 'No movies found')
+        self.assertTrue(len(r.json()['results']) > 0,
+                        'No movies found')
 
     def test_get_valid_movies_with_count(self):
         """
@@ -29,7 +30,7 @@ class TestAPI(BaseTest):
         Assert: HTTP 200, # of movies returned == count specified
         """
         count = 3
-        r = self.get_movies(movie='batman', count=count)
+        r = self.get_movies(movie=self.default_movie, count=count)
         self.assertTrue(r.status_code == 200,
                         'Expected 200, received ' + str(r.status_code))
         self.assertTrue(len(r.json()['results']) == 3,

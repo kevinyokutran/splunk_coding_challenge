@@ -4,7 +4,6 @@ from BaseTest import BaseTest
 
 class TestRequirements(BaseTest):
 
-
     max_genre_ids = 400
     max_genre_ids_count = 7
     expected_similar_count = 2
@@ -31,7 +30,11 @@ class TestRequirements(BaseTest):
         SPL-002:
         All poster_path links must be valid. poster_path link of null is also acceptable
         """
-        pass
+        for movie in self.response.json()['results']:
+            self.assertTrue(
+                self.is_drop_box_link_valid(movie['poster_path']),
+                "Invalid poster_path: " + movie['poster_path']
+            )
 
     def test_spl_003(self):
         """
@@ -41,15 +44,25 @@ class TestRequirements(BaseTest):
         Rule #2, if multiple movies have genre_ids == null, then sort by id (ascending).
         For movies that have non-null genre_ids, results should be sorted by id (ascending)
         """
-        pass
-
-    # def test_print(self):
-    #     """
-    #     SPL-005:
-    #     There is at least one movie in the database whose title has a palindrome in it.
-    #     """
-    #     r = self.get_movies(movie='batman')
-    #     print(self._validate_drop_box_link('https://www.dropbox.com/s/8i8v4ak8tnp03w4/'))
+        prev = None
+        for movie in self.response.json()['results']:
+            if prev is not None:
+                if movie['genre_ids'] is None and prev['genre_ids'] is None:
+                    self.assertTrue(
+                        movie['id'] > prev['id'],
+                        'SPL-003 Rule #2 violated, movies with null genre ids are not sorted by id'
+                    )
+                elif movie['genre_ids'] is not None and prev['genre_ids'] is not None:
+                    self.assertTrue(
+                        movie['id'] > prev['id'],
+                        'SPL-003 Rule #2 violated, movies with non null genre ids are not sorted by id'
+                    )
+                else:
+                    self.assertTrue(
+                        False,
+                        'SPL-003 Rule #1 violated. Null genre ids are not first'
+                    )
+            prev = movie
 
     def test_spl_004(self):
         """
@@ -88,23 +101,6 @@ class TestRequirements(BaseTest):
                     count += 1
         self.assertTrue(count >= self.expected_similar_count, 'Not enough similar titles')
 
-    def _validate_drop_box_link(self, url):
-        headers = {
-            "Authorization": "Bearer null",
-            "Content-Type": "application/json",
-            "Dropbox-Api-Select-User": ""
-        }
-        data = {
-            "path": url
-        }
-        if url is None:
-            return True
-        else:
-            r = requests.post(self.drop_box_url, headers=headers, data=json.dumps(data))
-            return r.status_code
-
 
 if __name__ == '__main__':
     unittest.main()
-
-# curl -X GET https://splunk.mocklab.io/movies?q=batman -H "Accept: application/json"

@@ -1,12 +1,19 @@
-# splunk_coding_challenge
+# Splunk Coding Challenge (SDT)
 
-To run all tests:
+### Description
 
-Required libraries:
+Completed using Python3
 
-unittest
-json
-requests
+### To run all tests:
 
-Go to the directory of the tests and enter
+Go to the directory of the tests and enter  
 `python -m unittest discover .`
+
+Alternatively `python test_X.py` to run reach test file individually
+
+### Dependencies:
+`pip install ...`
+* unittest
+* json
+* requests
+
